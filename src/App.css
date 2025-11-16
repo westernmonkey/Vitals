@@ -2598,6 +2598,31 @@ body {
   transform: translateY(-2px);
 }
 
+.analysis-summary {
+  margin: 16px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(7, 133, 84, 0.05) 0%, rgba(19, 165, 106, 0.03) 100%);
+  border-radius: 12px;
+  border-left: 4px solid #078554;
+}
+
+.analysis-summary strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analysis-summary p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #1a1a1a;
+  margin: 0;
+}
+
 .diagnosis-list,
 .tests-list {
   margin: 16px 0;

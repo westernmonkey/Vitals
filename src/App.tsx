@@ -1314,17 +1314,126 @@ Return ONLY the JSON, nothing else.`
     
     if (!selectedPatient) return
     
-    // Update patient to show consultation inactive
-    setPatients(prev => prev.map(p => 
-      p.patientName === selectedPatient.patientName 
-        ? { ...p, consultationActive: false, doctorNotes: doctorNotes }
-        : p
-    ))
-    setSelectedPatient({ ...selectedPatient, consultationActive: false, doctorNotes: doctorNotes })
-    
-    // Generate reports using Gemini API
+    // Generate AI Analysis from live consultation transcript
     const GEMINI_API_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY || 'AIzaSyB_wmrEbTz9YJlMUvNDFaUwcoJCyf1AuVE'
     
+    // Create full consultation transcript text
+    const fullTranscript = realTimeTranscript.map(msg => 
+      `${msg.role === 'doctor' ? 'Doctor' : 'Patient'}: ${msg.text}`
+    ).join('\n\n')
+    
+    // Generate AI Analysis (possible diagnoses and recommended tests)
+    try {
+      const analysisPrompt = `You are a medical AI assistant. Analyze this complete doctor-patient consultation transcript and provide:
+
+1. POSSIBLE DIAGNOSES: List 3-5 possible medical conditions/diagnoses based on the symptoms, complaints, and examination findings mentioned. Include confidence levels if possible.
+
+2. RECOMMENDED TESTS: List specific medical tests, scans, or procedures that should be conducted to confirm or rule out the diagnoses.
+
+CONSULTATION TRANSCRIPT:
+${fullTranscript || consultationTranscript || 'No transcript available'}
+
+PRE-SCREENING DATA:
+${JSON.stringify({
+  symptoms: selectedPatient.symptoms,
+  allergies: selectedPatient.allergies,
+  medications: selectedPatient.medications,
+  chronicConditions: selectedPatient.chronicConditions,
+  chiefComplaint: selectedPatient.chiefComplaint
+}, null, 2)}
+
+MEDICAL HISTORY:
+${selectedPatient.pdfSummary || 'No medical history provided'}
+
+Respond in JSON format:
+{
+  "possibleDiagnosis": ["diagnosis 1", "diagnosis 2", "diagnosis 3"],
+  "recommendedTests": ["test 1", "test 2", "test 3"],
+  "analysis": "Brief summary of findings and clinical reasoning"
+}
+
+Return ONLY the JSON, nothing else.`
+      
+      const analysisResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: analysisPrompt }] }]
+        })
+      })
+      
+      const analysisData = await analysisResponse.json()
+      if (analysisData.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const analysisText = analysisData.candidates[0].content.parts[0].text.trim()
+        try {
+          const jsonMatch = analysisText.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            const analysis = JSON.parse(jsonMatch[0])
+            console.log('✅ AI Analysis generated:', analysis)
+            
+            // Update patient with new analysis
+            const updatedPatient = {
+              ...selectedPatient,
+              possibleDiagnosis: analysis.possibleDiagnosis || selectedPatient.possibleDiagnosis || [],
+              recommendedTests: analysis.recommendedTests || selectedPatient.recommendedTests || [],
+              aiAnalysis: analysis.analysis || selectedPatient.aiAnalysis || '',
+              consultationActive: false,
+              doctorNotes: doctorNotes
+            }
+            
+            setSelectedPatient(updatedPatient)
+            setPatients(prev => prev.map(p => 
+              p.patientName === selectedPatient.patientName 
+                ? updatedPatient
+                : p
+            ))
+          }
+        } catch (e) {
+          console.error('Error parsing AI analysis:', e)
+          // Fallback: update patient without analysis
+          const fallbackPatient = {
+            ...selectedPatient,
+            consultationActive: false,
+            doctorNotes: doctorNotes
+          }
+          setSelectedPatient(fallbackPatient)
+          setPatients(prev => prev.map(p => 
+            p.patientName === selectedPatient.patientName 
+              ? fallbackPatient
+              : p
+          ))
+        }
+      } else {
+        // No analysis generated, just update consultation status
+        const fallbackPatient = {
+          ...selectedPatient,
+          consultationActive: false,
+          doctorNotes: doctorNotes
+        }
+        setSelectedPatient(fallbackPatient)
+        setPatients(prev => prev.map(p => 
+          p.patientName === selectedPatient.patientName 
+            ? fallbackPatient
+            : p
+        ))
+      }
+    } catch (error) {
+      console.error('Error generating AI analysis:', error)
+      // Fallback: update patient without analysis
+      const fallbackPatient = {
+        ...selectedPatient,
+        consultationActive: false,
+        doctorNotes: doctorNotes
+      }
+      setSelectedPatient(fallbackPatient)
+      setPatients(prev => prev.map(p => 
+        p.patientName === selectedPatient.patientName 
+          ? fallbackPatient
+          : p
+      ))
+    }
+    
+    // Generate reports using Gemini API
     const prompt = `Generate medical reports based on the following information:
 
 PATIENT PRE-SCREENING DATA:
@@ -1662,18 +1771,31 @@ Generated: ${new Date().toLocaleString()}
                 </div>
               )}
 
-              {/* AI Analysis */}
-              {selectedPatient.possibleDiagnosis && selectedPatient.possibleDiagnosis.length > 0 && (
+              {/* AI Analysis - Always show if consultation has ended or pre-screening data exists */}
+              {((selectedPatient.possibleDiagnosis && selectedPatient.possibleDiagnosis.length > 0) || 
+                (selectedPatient.recommendedTests && selectedPatient.recommendedTests.length > 0) ||
+                selectedPatient.aiAnalysis) && (
                 <div className="ai-analysis-card">
-                  <h4>AI Analysis</h4>
-                  <div className="diagnosis-list">
-                    <strong>Possible Diagnosis:</strong>
-                    <ul>
-                      {selectedPatient.possibleDiagnosis.map((d, i) => (
-                        <li key={i}>{d}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  <h4>🤖 AI Analysis</h4>
+                  
+                  {selectedPatient.aiAnalysis && (
+                    <div className="analysis-summary">
+                      <strong>Clinical Analysis:</strong>
+                      <p>{selectedPatient.aiAnalysis}</p>
+                    </div>
+                  )}
+                  
+                  {selectedPatient.possibleDiagnosis && selectedPatient.possibleDiagnosis.length > 0 && (
+                    <div className="diagnosis-list">
+                      <strong>Possible Diagnosis:</strong>
+                      <ul>
+                        {selectedPatient.possibleDiagnosis.map((d, i) => (
+                          <li key={i}>{d}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
                   {selectedPatient.recommendedTests && selectedPatient.recommendedTests.length > 0 && (
                     <div className="tests-list">
                       <strong>Recommended Tests:</strong>
