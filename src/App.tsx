@@ -1764,18 +1764,107 @@ Generated: ${new Date().toLocaleString()}
               <h2>Doctor Dashboard</h2>
             </div>
             <div className="chat-messages-container">
+              {/* Quick Actions - Always Visible */}
               <div className="patient-info-card">
-                <h4>Welcome to Vitals Dashboard</h4>
-                <p>Select a patient from the sidebar to view their information and start a consultation.</p>
-                <p>Features available:</p>
-                <ul style={{ marginTop: '16px', paddingLeft: '20px' }}>
-                  <li>📋 Real-time consultation transcription</li>
-                  <li>📝 Live notes taking</li>
-                  <li>🏥 Sick leave certificate generation</li>
-                  <li>💳 Insurance claim processing</li>
-                  <li>🤖 AI analysis and diagnosis recommendations</li>
-                  <li>📊 Medical history review</li>
-                </ul>
+                <h4>Quick Actions</h4>
+                <div className="action-buttons-section">
+                  <motion.button
+                    className="action-button"
+                    onClick={() => {
+                      alert('Select a patient from the sidebar to start a consultation')
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    🎤 Start New Consultation
+                  </motion.button>
+                  <motion.button
+                    className="action-button"
+                    onClick={() => {
+                      alert('Select a patient to view their medical history')
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    📋 View Medical History
+                  </motion.button>
+                  <motion.button
+                    className="action-button"
+                    onClick={() => {
+                      alert('Select a patient to generate sick leave certificate')
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    🏥 Generate Sick Leave
+                  </motion.button>
+                  <motion.button
+                    className="action-button"
+                    onClick={() => {
+                      alert('Select a patient to process insurance claim')
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    💳 Process Insurance Claim
+                  </motion.button>
+                  <motion.button
+                    className="action-button"
+                    onClick={() => {
+                      alert('Select a patient to view AI analysis')
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    🤖 View AI Analysis
+                  </motion.button>
+                  <motion.button
+                    className="action-button"
+                    onClick={() => {
+                      alert('Select a patient to download report')
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    📥 Download Report
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Features Overview */}
+              <div className="patient-info-card" style={{ marginTop: '24px' }}>
+                <h4>Dashboard Features</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">📋 Real-time Transcription:</span>
+                    <span className="info-value">Automatically transcribes doctor-patient conversations during consultations</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">📝 Live Notes:</span>
+                    <span className="info-value">AI-powered note-taking that identifies speakers and creates polished medical notes</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">🏥 Sick Leave:</span>
+                    <span className="info-value">Auto-generates sick leave certificates with patient data after consultation</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">💳 Insurance Claims:</span>
+                    <span className="info-value">Automatically creates insurance claim forms with diagnosis and treatment details</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">🤖 AI Analysis:</span>
+                    <span className="info-value">Provides possible diagnoses and recommended tests based on consultation data</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">📊 Medical History:</span>
+                    <span className="info-value">View uploaded PDF medical history and pre-screening conversation summaries</span>
+                  </div>
+                </div>
+                <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(7, 133, 84, 0.1)', borderRadius: '12px', textAlign: 'center' }}>
+                  <p style={{ color: '#065f46', fontWeight: 600, fontSize: '16px' }}>
+                    👈 Select a patient from the sidebar to get started
+                  </p>
+                </div>
               </div>
             </div>
           </div>
