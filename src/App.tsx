@@ -60,7 +60,7 @@ function Landing() {
       >
         <div className="header-content-cluely">
           <div className="logo-cluely">
-            <span className="logo-text-cluely">HealthAI</span>
+            <span className="logo-text-cluely">Vitals</span>
           </div>
           <nav className="header-nav-cluely">
             <a href="#pricing">Pricing</a>
@@ -223,8 +223,8 @@ function Landing() {
             ]}
             speed={40}
             direction="left"
-            logoHeight={40}
-            gap={60}
+            logoHeight={28}
+            gap={40}
             hoverSpeed={10}
             scaleOnHover
             fadeOut
@@ -232,77 +232,6 @@ function Landing() {
             ariaLabel="Healthcare services"
           />
         </motion.div>
-
-        {/* Testimonials Section */}
-        <motion.section
-          className="testimonials-section-cluely"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.0, duration: 0.8 }}
-        >
-          <h2 className="testimonials-heading-cluely">Trusted by Healthcare Professionals</h2>
-          <div className="testimonials-grid-cluely">
-            <motion.div
-              className="testimonial-card-cluely"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.2, duration: 0.6 }}
-              whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(7, 133, 84, 0.2)" }}
-            >
-              <div className="testimonial-quote-cluely">"</div>
-              <p className="testimonial-text-cluely">
-                HealthAI has transformed how I interact with patients. The real-time transcription saves me hours every day, and the AI insights help me make better decisions faster.
-              </p>
-              <div className="testimonial-author-cluely">
-                <div className="testimonial-avatar-cluely">DR</div>
-                <div>
-                  <div className="testimonial-name-cluely">Dr. Sarah Chen</div>
-                  <div className="testimonial-role-cluely">Cardiologist, Mayo Clinic</div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="testimonial-card-cluely"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.4, duration: 0.6 }}
-              whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(7, 133, 84, 0.2)" }}
-            >
-              <div className="testimonial-quote-cluely">"</div>
-              <p className="testimonial-text-cluely">
-                The automated report generation is a game-changer. I can focus on patient care while HealthAI handles the documentation. It's like having a medical scribe that never gets tired.
-              </p>
-              <div className="testimonial-author-cluely">
-                <div className="testimonial-avatar-cluely">JM</div>
-                <div>
-                  <div className="testimonial-name-cluely">Dr. James Martinez</div>
-                  <div className="testimonial-role-cluely">Family Physician, Private Practice</div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="testimonial-card-cluely"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.6, duration: 0.6 }}
-              whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(7, 133, 84, 0.2)" }}
-            >
-              <div className="testimonial-quote-cluely">"</div>
-              <p className="testimonial-text-cluely">
-                Our clinic's efficiency has increased by 40% since implementing HealthAI. The insurance claim automation alone has saved us countless hours of paperwork.
-              </p>
-              <div className="testimonial-author-cluely">
-                <div className="testimonial-avatar-cluely">AR</div>
-                <div>
-                  <div className="testimonial-name-cluely">Dr. Amanda Rodriguez</div>
-                  <div className="testimonial-role-cluely">Medical Director, HealthPlus Clinic</div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.section>
       </div>
     </div>
   )
@@ -406,39 +335,39 @@ function VoiceSession() {
       isConnectedRef.current = true
     })
 
-    vapi.on('call-end', () => {
-      console.log('🛑 Call ended')
-      setStatus('idle')
-      isConnectedRef.current = false
-      
-      // Use ref to get latest messages
-      const allMessages = messagesRef.current
-      console.log('📝 All messages collected:', allMessages)
-      
-      // Extract information from conversation
-      const extracted = extractInformationFromConversation(allMessages)
-      
-      // Get medical protocol recommendations
-      const symptoms = extracted.symptoms || []
-      const recommendedTests = getRecommendedTests(symptoms)
-      const possibleDiagnosis = getPossibleDiagnosis(symptoms)
-      
-      const finalData: ConversationData = {
-        messages: allMessages,
-        ...extracted,
-        pdfContent: pdfContent,
-        pdfSummary: pdfContent, // Store PDF summary separately
-        recommendedTests: recommendedTests,
-        possibleDiagnosis: possibleDiagnosis
-      }
-      
-      console.log('📊 Extracted data:', finalData)
-      
-      // Send directly to doctor dashboard (not show report to patient)
-      setTimeout(() => {
-        navigate('/dashboard', { state: finalData })
-      }, 500)
-    })
+      vapi.on('call-end', async () => {
+        console.log('🛑 Call ended')
+        setStatus('idle')
+        isConnectedRef.current = false
+        
+        // Use ref to get latest messages
+        const allMessages = messagesRef.current
+        console.log('📝 All messages collected:', allMessages)
+        
+        // Extract information from conversation using LLM
+        const extracted = await extractInformationFromConversation(allMessages)
+        
+        // Get medical protocol recommendations
+        const symptoms = extracted.symptoms || []
+        const recommendedTests = getRecommendedTests(symptoms)
+        const possibleDiagnosis = getPossibleDiagnosis(symptoms)
+        
+        const finalData: ConversationData = {
+          messages: allMessages,
+          ...extracted,
+          pdfContent: pdfContent,
+          pdfSummary: pdfContent, // Store PDF summary separately
+          recommendedTests: recommendedTests,
+          possibleDiagnosis: possibleDiagnosis
+        }
+        
+        console.log('📊 Extracted data:', finalData)
+        
+            // Send to post-Jamie screen first
+            setTimeout(() => {
+              navigate('/post-jamie', { state: finalData })
+            }, 500)
+      })
 
     vapi.on('speech-start', () => {
       setStatus('listening')
@@ -517,135 +446,142 @@ function VoiceSession() {
     }
   }, [navigate])
 
-  const extractInformationFromConversation = (msgs: Message[]): Partial<ConversationData> => {
+  const extractInformationFromConversation = async (msgs: Message[]): Promise<Partial<ConversationData>> => {
     const fullText = msgs.map(m => `${m.role === 'user' ? 'Patient' : 'Jamie'}: ${m.text}`).join('\n')
     const userMessages = msgs.filter(m => m.role === 'user').map(m => m.text).join(' ')
     const assistantMessages = msgs.filter(m => m.role === 'assistant').map(m => m.text).join(' ')
     
-    // Extract basic info using simple patterns (in production, use AI/NLP)
+    // Use LLM to extract information accurately
+    const GEMINI_API_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY || 'AIzaSyB_wmrEbTz9YJlMUvNDFaUwcoJCyf1AuVE'
+    
+    const extractionPrompt = `You are a medical information extraction assistant. Analyze this complete conversation between a healthcare AI assistant (Jamie) and a patient, and extract all relevant medical information.
+
+FULL CONVERSATION:
+${fullText}
+
+Extract the following information and return ONLY a JSON object:
+{
+  "patientName": "extracted name or 'Patient' if not found",
+  "patientAge": "age in years or null",
+  "patientGender": "male/female/other or null",
+  "chiefComplaint": "main reason for visit in one sentence",
+  "symptoms": ["symptom 1", "symptom 2", ...],
+  "allergies": ["allergy 1", "allergy 2", ...] or ["None"] if none mentioned,
+  "medications": ["medication 1", "medication 2", ...] or ["None"] if none mentioned,
+  "chronicConditions": ["condition 1", "condition 2", ...] or ["None"] if none mentioned
+}
+
+Be thorough and extract ALL mentioned symptoms, allergies, medications, and conditions. Return ONLY the JSON, nothing else.`
+    
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: extractionPrompt }] }]
+        })
+      })
+      
+      const data = await response.json()
+      if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const responseText = data.candidates[0].content.parts[0].text.trim()
+        try {
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            const extracted = JSON.parse(jsonMatch[0])
+            console.log('✅ LLM extracted information:', extracted)
+            
+            // Use LLM extracted data
+            const symptoms: string[] = Array.isArray(extracted.symptoms) ? extracted.symptoms.map((s: any) => String(s)) : []
+            const allergies: string[] = Array.isArray(extracted.allergies) ? extracted.allergies.map((a: any) => String(a)) : ['None reported']
+            const medications: string[] = Array.isArray(extracted.medications) ? extracted.medications.map((m: any) => String(m)) : ['None reported']
+            const conditions: string[] = Array.isArray(extracted.chronicConditions) ? extracted.chronicConditions.map((c: any) => String(c)) : ['None reported']
+            
+            // Enhanced key findings with bullet points
+            const keyFindings: string[] = []
+            if (symptoms.length > 0) {
+              keyFindings.push(`• Primary Symptoms: ${[...new Set(symptoms)].join(', ')}`)
+            }
+            if (allergies.length > 0 && allergies[0] !== 'None') {
+              keyFindings.push(`• Allergies: ${[...new Set(allergies)].join(', ')}`)
+            } else {
+              keyFindings.push(`• Allergies: None reported`)
+            }
+            if (conditions.length > 0 && conditions[0] !== 'None') {
+              keyFindings.push(`• Chronic Conditions: ${[...new Set(conditions)].join(', ')}`)
+            } else {
+              keyFindings.push(`• Chronic Conditions: None reported`)
+            }
+            if (medications.length > 0 && medications[0] !== 'None') {
+              keyFindings.push(`• Current Medications: ${[...new Set(medications)].join(', ')}`)
+            } else {
+              keyFindings.push(`• Current Medications: None reported`)
+            }
+            if (keyFindings.length === 0) {
+              keyFindings.push('• No specific findings reported')
+            }
+            
+            // Enhanced recommendations
+            const recommendations: string[] = []
+            if (symptoms.length > 0) {
+              recommendations.push(`• Follow-up consultation recommended based on symptoms`)
+              recommendations.push(`• Monitor symptom progression`)
+            } else {
+              recommendations.push(`• Routine check-up recommended`)
+            }
+            if (medications.length > 0 && medications[0] !== 'None') {
+              recommendations.push(`• Review current medications for interactions`)
+            }
+            recommendations.push(`• Continue monitoring patient condition`)
+            
+            return {
+              patientName: extracted.patientName || 'Patient',
+              patientAge: extracted.patientAge || undefined,
+              patientGender: extracted.patientGender || undefined,
+              chiefComplaint: extracted.chiefComplaint || 'General consultation',
+              symptoms: symptoms.length > 0 ? [...new Set(symptoms)] : ['General consultation'],
+              allergies: allergies[0] === 'None' ? ['None reported'] : [...new Set(allergies)],
+              medications: medications[0] === 'None' ? ['None reported'] : [...new Set(medications)],
+              chronicConditions: conditions[0] === 'None' ? ['None reported'] : [...new Set(conditions)],
+              medicalHistory: fullText,
+              aiAnalysis: assistantMessages.length > 0 
+                ? assistantMessages.split('.').slice(0, 5).join('.') + '.'
+                : `Based on conversation: ${symptoms.length > 0 ? 'Symptoms detected: ' + symptoms.join(', ') : 'General consultation'}`,
+              keyFindings: keyFindings,
+              recommendations: recommendations
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing LLM extraction:', e)
+        }
+      }
+    } catch (error) {
+      console.error('Error extracting information with LLM:', error)
+    }
+    
+    // Fallback to basic extraction if LLM fails
     const nameMatch = userMessages.match(/my name is ([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i) || 
                       userMessages.match(/i'm ([A-Z][a-z]+)/i) ||
                       userMessages.match(/i am ([A-Z][a-z]+)/i) ||
                       userMessages.match(/name is ([A-Z][a-z]+)/i)
     const ageMatch = userMessages.match(/(\d+)\s*(?:years?|yrs?|old)/i)
     const genderMatch = userMessages.match(/\b(male|female|man|woman)\b/i)
-    
-    // Extract symptoms - more comprehensive
-    const symptomKeywords = ['pain', 'ache', 'fever', 'cough', 'headache', 'nausea', 'dizziness', 'fatigue', 
-                            'cold', 'sore throat', 'runny nose', 'congestion', 'breathing', 'shortness of breath',
-                            'chest pain', 'back pain', 'joint pain', 'stomach', 'vomiting', 'diarrhea']
-    const symptoms: string[] = []
-    symptomKeywords.forEach(keyword => {
-      if (userMessages.toLowerCase().includes(keyword)) {
-        // Try to extract full symptom phrase
-        const regex = new RegExp(`([^.]*${keyword}[^.]*)`, 'i')
-        const match = userMessages.match(regex)
-        if (match) {
-          symptoms.push(match[1].trim())
-        } else {
-          symptoms.push(keyword)
-        }
-      }
-    })
-    
-    // Extract allergies
-    const allergies: string[] = []
-    const allergyPatterns = [
-      /allergic to ([^.]+)/i,
-      /allergy to ([^.]+)/i,
-      /allergic ([^.]+)/i
-    ]
-    allergyPatterns.forEach(pattern => {
-      const match = userMessages.match(pattern)
-      if (match) {
-        allergies.push(match[1].trim())
-      }
-    })
-    
-    // Extract medications
-    const medications: string[] = []
-    const medPatterns = [
-      /taking ([^.]+)/i,
-      /medication ([^.]+)/i,
-      /prescribed ([^.]+)/i,
-      /on ([^.]+) medication/i
-    ]
-    medPatterns.forEach(pattern => {
-      const match = userMessages.match(pattern)
-      if (match) {
-        medications.push(match[1].trim())
-      }
-    })
-    
-    // Extract chronic conditions
-    const conditionKeywords = ['diabetes', 'hypertension', 'asthma', 'heart', 'kidney', 'liver', 
-                              'high blood pressure', 'cholesterol', 'arthritis', 'depression', 'anxiety']
-    const conditions: string[] = []
-    conditionKeywords.forEach(keyword => {
-      if (userMessages.toLowerCase().includes(keyword)) {
-        conditions.push(keyword)
-      }
-    })
-    
-    // Chief complaint - get first substantial user message
     const firstUserMsg = msgs.find(m => m.role === 'user' && m.text.length > 10)
     const chiefComplaint = firstUserMsg?.text || userMessages.split('.')[0] || 'General consultation'
-    
-    // AI Analysis from assistant messages - more comprehensive
-    const aiAnalysis = assistantMessages.length > 0 
-      ? assistantMessages.split('.').slice(0, 5).join('.') + '.'
-      : `Based on conversation: ${symptoms.length > 0 ? 'Symptoms detected: ' + symptoms.join(', ') : 'General consultation'}`
-    
-    // Enhanced key findings with bullet points
-    const keyFindings: string[] = []
-    if (symptoms.length > 0) {
-      keyFindings.push(`• Primary Symptoms: ${[...new Set(symptoms)].join(', ')}`)
-    }
-    if (allergies.length > 0) {
-      keyFindings.push(`• Allergies: ${[...new Set(allergies)].join(', ')}`)
-    } else {
-      keyFindings.push(`• Allergies: None reported`)
-    }
-    if (conditions.length > 0) {
-      keyFindings.push(`• Chronic Conditions: ${[...new Set(conditions)].join(', ')}`)
-    } else {
-      keyFindings.push(`• Chronic Conditions: None reported`)
-    }
-    if (medications.length > 0) {
-      keyFindings.push(`• Current Medications: ${[...new Set(medications)].join(', ')}`)
-    } else {
-      keyFindings.push(`• Current Medications: None reported`)
-    }
-    if (keyFindings.length === 0) {
-      keyFindings.push('• No specific findings reported')
-    }
-    
-    // Enhanced recommendations
-    const recommendations: string[] = []
-    if (symptoms.length > 0) {
-      recommendations.push(`• Follow-up consultation recommended based on symptoms`)
-      recommendations.push(`• Monitor symptom progression`)
-    } else {
-      recommendations.push(`• Routine check-up recommended`)
-    }
-    if (medications.length > 0) {
-      recommendations.push(`• Review current medications for interactions`)
-    }
-    recommendations.push(`• Continue monitoring patient condition`)
     
     return {
       patientName: nameMatch ? nameMatch[1] : 'Patient',
       patientAge: ageMatch ? ageMatch[1] : undefined,
       patientGender: genderMatch ? genderMatch[1] : undefined,
       chiefComplaint: chiefComplaint.length > 100 ? chiefComplaint.substring(0, 100) + '...' : chiefComplaint,
-      symptoms: symptoms.length > 0 ? [...new Set(symptoms)] : ['General consultation'],
-      allergies: allergies.length > 0 ? [...new Set(allergies)] : ['None reported'],
-      medications: medications.length > 0 ? [...new Set(medications)] : ['None reported'],
-      chronicConditions: conditions.length > 0 ? [...new Set(conditions)] : ['None reported'],
+      symptoms: ['General consultation'],
+      allergies: ['None reported'],
+      medications: ['None reported'],
+      chronicConditions: ['None reported'],
       medicalHistory: fullText,
-      aiAnalysis: aiAnalysis,
-      keyFindings: keyFindings,
-      recommendations: recommendations
+      aiAnalysis: 'Analysis pending',
+      keyFindings: ['• No specific findings reported'],
+      recommendations: ['• Routine check-up recommended']
     }
   }
 
@@ -963,6 +899,7 @@ function Report() {
 }
 
 function DoctorDashboard() {
+  const navigate = useNavigate()
   const location = window.history.state
   const [selectedPatient, setSelectedPatient] = useState<ConversationData | null>(null)
   const [patients, setPatients] = useState<ConversationData[]>([])
@@ -987,6 +924,14 @@ function DoctorDashboard() {
   const groqClientRef = useRef<Groq | null>(null)
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const transcriptEndRef = useRef<HTMLDivElement>(null)
+
+  // Check if doctor is logged in
+  useEffect(() => {
+    if (!localStorage.getItem('doctorLoggedIn')) {
+      navigate('/doctor-login')
+      return
+    }
+  }, [navigate])
 
   useEffect(() => {
     if (location?.usr) {
@@ -1390,150 +1335,54 @@ Return ONLY the JSON, nothing else.`
           }
         } catch (e) {
           console.error('Error parsing AI analysis:', e)
-          // Fallback: update patient without analysis
-          const fallbackPatient = {
-            ...selectedPatient,
-            consultationActive: false,
-            doctorNotes: doctorNotes
-          }
-          setSelectedPatient(fallbackPatient)
-          setPatients(prev => prev.map(p => 
-            p.patientName === selectedPatient.patientName 
-              ? fallbackPatient
-              : p
-          ))
         }
-      } else {
-        // No analysis generated, just update consultation status
-        const fallbackPatient = {
-          ...selectedPatient,
-          consultationActive: false,
-          doctorNotes: doctorNotes
-        }
-        setSelectedPatient(fallbackPatient)
-        setPatients(prev => prev.map(p => 
-          p.patientName === selectedPatient.patientName 
-            ? fallbackPatient
-            : p
-        ))
       }
     } catch (error) {
       console.error('Error generating AI analysis:', error)
-      // Fallback: update patient without analysis
-      const fallbackPatient = {
-        ...selectedPatient,
-        consultationActive: false,
-        doctorNotes: doctorNotes
-      }
-      setSelectedPatient(fallbackPatient)
-      setPatients(prev => prev.map(p => 
-        p.patientName === selectedPatient.patientName 
-          ? fallbackPatient
-          : p
-      ))
     }
     
-    // Generate reports using Gemini API
-    const prompt = `Generate medical reports based on the following information:
-
-PATIENT PRE-SCREENING DATA:
-${JSON.stringify({
-  name: selectedPatient.patientName,
-  age: selectedPatient.patientAge,
-  symptoms: selectedPatient.symptoms,
-  allergies: selectedPatient.allergies,
-  medications: selectedPatient.medications,
-  chronicConditions: selectedPatient.chronicConditions,
-  chiefComplaint: selectedPatient.chiefComplaint,
-  possibleDiagnosis: selectedPatient.possibleDiagnosis
-}, null, 2)}
-
-MEDICAL HISTORY (PDF):
-${selectedPatient.pdfSummary || 'No PDF uploaded'}
-
-DOCTOR'S CONSULTATION NOTES (AI-Polished):
-${doctorNotes.join('\n\n') || 'No notes taken'}
-
-REAL-TIME TRANSCRIPTION:
-${consultationTranscript || 'No transcript'}
-
-Generate:
-1. SICK LEAVE CERTIFICATE with: patient name, duration (suggest based on symptoms), reason, symptoms
-2. INSURANCE CLAIM with: patient name, diagnosis, treatment needed, estimated cost, clinical justification
-
-Format as JSON with keys: sickLeave, insuranceClaim`
+    // Auto-generate simple sick leave and insurance claim data
+    const consultationDuration = realTimeTranscript.length > 0 ? Math.ceil(realTimeTranscript.length / 2) : 3
+    const primarySymptom = selectedPatient.symptoms?.[0] || selectedPatient.chiefComplaint || 'General consultation'
+    const primaryDiagnosis = selectedPatient.possibleDiagnosis?.[0] || primarySymptom
     
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      })
-      
-      const data = await response.json()
-      if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const reportText = data.candidates[0].content.parts[0].text
-        // Try to parse JSON from response
-        try {
-          const jsonMatch = reportText.match(/\{[\s\S]*\}/)
-          if (jsonMatch) {
-            const reports = JSON.parse(jsonMatch[0])
-            setSickLeaveData(reports.sickLeave || {
-              patientName: selectedPatient.patientName,
-              days: 3,
-              reason: selectedPatient.possibleDiagnosis?.[0] || selectedPatient.chiefComplaint,
-              symptoms: selectedPatient.symptoms?.join(', ')
-            })
-            setInsuranceData(reports.insuranceClaim || {
-              patientName: selectedPatient.patientName,
-              diagnosis: selectedPatient.possibleDiagnosis?.[0] || 'General consultation',
-              treatment: 'Pending',
-              cost: 'Pending',
-              reason: selectedPatient.chiefComplaint
-            })
-          }
-        } catch (e) {
-          // Fallback if JSON parsing fails
-          setSickLeaveData({
-            patientName: selectedPatient.patientName,
-            days: 3,
-            reason: selectedPatient.possibleDiagnosis?.[0] || selectedPatient.chiefComplaint,
-            symptoms: selectedPatient.symptoms?.join(', ')
-          })
-          setInsuranceData({
-            patientName: selectedPatient.patientName,
-            diagnosis: selectedPatient.possibleDiagnosis?.[0] || 'General consultation',
-            treatment: 'Pending',
-            cost: 'Pending',
-            reason: selectedPatient.chiefComplaint
-          })
-        }
-        
-        // Show approval modals
-        setTimeout(() => {
-          setShowSickLeaveApproval(true)
-        }, 500)
-      }
-    } catch (error) {
-      console.error('Error generating reports:', error)
-      // Fallback data
-      setSickLeaveData({
-        patientName: selectedPatient.patientName,
-        days: 3,
-        reason: selectedPatient.possibleDiagnosis?.[0] || selectedPatient.chiefComplaint,
-        symptoms: selectedPatient.symptoms?.join(', ')
-      })
-      setInsuranceData({
-        patientName: selectedPatient.patientName,
-        diagnosis: selectedPatient.possibleDiagnosis?.[0] || 'General consultation',
-        treatment: 'Pending',
-        cost: 'Pending',
-        reason: selectedPatient.chiefComplaint
-      })
+    // Simple sick leave data
+    setSickLeaveData({
+      patientName: selectedPatient.patientName || 'Patient',
+      days: consultationDuration,
+      reason: primaryDiagnosis,
+      symptoms: selectedPatient.symptoms?.join(', ') || primarySymptom,
+      startDate: new Date().toLocaleDateString(),
+      endDate: new Date(Date.now() + consultationDuration * 24 * 60 * 60 * 1000).toLocaleDateString()
+    })
+    
+    // Simple insurance claim data
+    setInsuranceData({
+      patientName: selectedPatient.patientName || 'Patient',
+      diagnosis: primaryDiagnosis,
+      treatment: 'Medical consultation and evaluation',
+      cost: '$150 - $300',
+      reason: selectedPatient.chiefComplaint || 'General consultation',
+      date: new Date().toLocaleDateString()
+    })
+    
+    // Update patient status
+    const updatedPatient = {
+      ...selectedPatient,
+      consultationActive: false,
+      doctorNotes: doctorNotes
+    }
+    setSelectedPatient(updatedPatient)
+    setPatients(prev => prev.map(p => 
+      p.patientName === selectedPatient.patientName 
+        ? updatedPatient
+        : p
+    ))
+    
+    // Show sick leave modal first
+    setTimeout(() => {
       setShowSickLeaveApproval(true)
-    }
+    }, 500)
   }
   
   const handleAddNote = () => {
@@ -1550,52 +1399,64 @@ Format as JSON with keys: sickLeave, insuranceClaim`
   }
   
   const handleApproveSickLeave = () => {
-    const report = `SICK LEAVE CERTIFICATE APPROVED
-
-Patient: ${sickLeaveData?.patientName}
-Duration: ${sickLeaveData?.days} days
-Reason: ${sickLeaveData?.reason}
-Symptoms: ${sickLeaveData?.symptoms}
-Approval Note: ${sickLeaveApprovalText || 'Approved by doctor'}
-
-Generated: ${new Date().toLocaleString()}
-`
-    const emailSubject = encodeURIComponent(`Sick Leave Approved: ${sickLeaveData?.patientName}`)
-    const emailBody = encodeURIComponent(report)
-    window.location.href = `mailto:ssagala@wisc.edu?subject=${emailSubject}&body=${emailBody}`
     setShowSickLeaveApproval(false)
-    alert('Sick leave approved and sent to ssagala@wisc.edu')
+    // Automatically show insurance claim modal after sick leave
+    setTimeout(() => {
+      setShowInsuranceApproval(true)
+    }, 300)
   }
   
   const handleApproveInsurance = () => {
-    const report = `INSURANCE CLAIM APPROVED
+    // Generate complete report with both sick leave and insurance claim
+    const completeReport = `COMPLETE MEDICAL REPORT
+    
+PATIENT INFORMATION:
+Patient: ${selectedPatient?.patientName || 'Patient'}
+Age: ${selectedPatient?.patientAge || 'N/A'}
+Gender: ${selectedPatient?.patientGender || 'N/A'}
+Date: ${new Date().toLocaleString()}
 
-Patient: ${insuranceData?.patientName}
-Diagnosis: ${insuranceData?.diagnosis}
-Treatment: ${insuranceData?.treatment}
-Cost: ${insuranceData?.cost}
-Reason: ${insuranceData?.reason}
-Approval Note: ${insuranceApprovalText || 'Approved by doctor'}
+SICK LEAVE CERTIFICATE:
+Duration: ${sickLeaveData?.days || 3} days
+Start Date: ${sickLeaveData?.startDate || new Date().toLocaleDateString()}
+End Date: ${sickLeaveData?.endDate || new Date(Date.now() + (sickLeaveData?.days || 3) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+Reason: ${sickLeaveData?.reason || selectedPatient?.possibleDiagnosis?.[0] || selectedPatient?.chiefComplaint}
+Symptoms: ${sickLeaveData?.symptoms || selectedPatient?.symptoms?.join(', ') || 'General consultation'}
+Sick Leave Approval: ${sickLeaveApprovalText || 'Approved by doctor'}
+
+INSURANCE CLAIM:
+Diagnosis: ${insuranceData?.diagnosis || selectedPatient?.possibleDiagnosis?.[0] || 'General consultation'}
+Treatment: ${insuranceData?.treatment || 'Medical consultation and evaluation'}
+Estimated Cost: ${insuranceData?.cost || '$150 - $300'}
+Reason: ${insuranceData?.reason || selectedPatient?.chiefComplaint || 'General consultation'}
+Insurance Approval: ${insuranceApprovalText || 'Approved by doctor'}
+
+CONSULTATION SUMMARY:
+Chief Complaint: ${selectedPatient?.chiefComplaint || 'General consultation'}
+Symptoms: ${selectedPatient?.symptoms?.join(', ') || 'None reported'}
+Allergies: ${selectedPatient?.allergies?.join(', ') || 'None reported'}
+Medications: ${selectedPatient?.medications?.join(', ') || 'None reported'}
+Chronic Conditions: ${selectedPatient?.chronicConditions?.join(', ') || 'None reported'}
+
+AI ANALYSIS:
+${selectedPatient?.aiAnalysis || 'Analysis pending'}
+
+POSSIBLE DIAGNOSIS:
+${selectedPatient?.possibleDiagnosis?.map((d, i) => `${i + 1}. ${d}`).join('\n') || 'Pending'}
+
+RECOMMENDED TESTS:
+${selectedPatient?.recommendedTests?.map((t, i) => `${i + 1}. ${t}`).join('\n') || 'Pending'}
+
+DOCTOR'S NOTES:
+${doctorNotes.join('\n\n') || 'No additional notes'}
 
 Generated: ${new Date().toLocaleString()}
 `
-    const emailSubject = encodeURIComponent(`Insurance Claim Approved: ${insuranceData?.patientName}`)
-    const emailBody = encodeURIComponent(report)
+    const emailSubject = encodeURIComponent(`Complete Medical Report: ${selectedPatient?.patientName || 'Patient'}`)
+    const emailBody = encodeURIComponent(completeReport)
     window.location.href = `mailto:ssagala@wisc.edu?subject=${emailSubject}&body=${emailBody}`
     setShowInsuranceApproval(false)
-    alert('Insurance claim approved and sent to ssagala@wisc.edu')
-  }
-
-  if (patients.length === 0) {
-    return (
-      <div className="dashboard-page">
-        <div className="dashboard-container-chat">
-          <div className="no-patient">
-            <p>No patients available. Waiting for patient reports...</p>
-          </div>
-        </div>
-      </div>
-    )
+    alert('Complete report (sick leave + insurance claim) sent to ssagala@wisc.edu')
   }
 
   return (
@@ -1608,7 +1469,12 @@ Generated: ${new Date().toLocaleString()}
             <span className="patient-count">{patients.length}</span>
           </div>
           <div className="patients-list">
-            {patients.map((patient) => (
+            {patients.length === 0 ? (
+              <div className="no-patient-message">
+                <p>No patients available. Waiting for patient reports...</p>
+              </div>
+            ) : (
+              patients.map((patient) => (
               <motion.div
                 key={patient.patientName || Math.random()}
                 className={`patient-chat-item ${selectedPatient?.patientName === patient.patientName ? 'active' : ''}`}
@@ -1616,25 +1482,26 @@ Generated: ${new Date().toLocaleString()}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="patient-avatar">
-                  {patient.patientName?.[0]?.toUpperCase() || 'P'}
-                </div>
-                <div className="patient-chat-info">
-                  <div className="patient-chat-name">{patient.patientName || 'Patient'}</div>
-                  <div className="patient-chat-preview">
-                    {patient.chiefComplaint || 'General consultation'}
+                  <div className="patient-avatar">
+                    {patient.patientName?.[0]?.toUpperCase() || 'P'}
                   </div>
-                </div>
-                {patient.consultationActive && (
-                  <div className="consultation-indicator"></div>
-                )}
-              </motion.div>
-            ))}
+                  <div className="patient-chat-info">
+                    <div className="patient-chat-name">{patient.patientName || 'Patient'}</div>
+                    <div className="patient-chat-preview">
+                      {patient.chiefComplaint || 'General consultation'}
+                    </div>
+                  </div>
+                  {patient.consultationActive && (
+                    <div className="consultation-indicator"></div>
+                  )}
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
 
         {/* Main Chat Area */}
-        {selectedPatient && (
+        {selectedPatient ? (
           <div className="chat-main-area">
             {/* Chat Header */}
             <div className="chat-header">
@@ -1826,6 +1693,91 @@ Generated: ${new Date().toLocaleString()}
                 </button>
               </div>
             )}
+
+            {/* Action Buttons - Always visible when patient is selected */}
+            {!consultationActive && (
+              <div className="action-buttons-section">
+                <motion.button
+                  className="action-button"
+                  onClick={() => {
+                    const report = `MEDICAL REPORT\n\nPatient: ${selectedPatient.patientName}\nAge: ${selectedPatient.patientAge}\nGender: ${selectedPatient.patientGender}\n\nChief Complaint: ${selectedPatient.chiefComplaint}\nSymptoms: ${selectedPatient.symptoms?.join(', ')}\nAllergies: ${selectedPatient.allergies?.join(', ')}\nMedications: ${selectedPatient.medications?.join(', ')}\n\nAI Analysis: ${selectedPatient.aiAnalysis || 'N/A'}\nPossible Diagnosis: ${selectedPatient.possibleDiagnosis?.join(', ') || 'N/A'}\nRecommended Tests: ${selectedPatient.recommendedTests?.join(', ') || 'N/A'}\n\nGenerated: ${new Date().toLocaleString()}`
+                    const blob = new Blob([report], { type: 'text/plain' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `Medical_Report_${selectedPatient.patientName}_${new Date().toISOString().split('T')[0]}.txt`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  📥 Download Report
+                </motion.button>
+                <motion.button
+                  className="action-button"
+                  onClick={() => {
+                    const tests = selectedPatient.recommendedTests?.join('\n') || 'No tests recommended yet'
+                    alert(`Order Tests:\n\n${tests}\n\nTests will be ordered for ${selectedPatient.patientName}`)
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  🧪 Order Tests
+                </motion.button>
+                <motion.button
+                  className="action-button"
+                  onClick={() => {
+                    const note = prompt('Enter a note for this patient:')
+                    if (note) {
+                      setDoctorNotes([...doctorNotes, note])
+                      setConsultationMessages([...consultationMessages, {
+                        role: 'doctor',
+                        text: note,
+                        timestamp: new Date()
+                      }])
+                    }
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  📝 Add Notes
+                </motion.button>
+                <motion.button
+                  className="action-button"
+                  onClick={() => {
+                    const email = `mailto:ssagala@wisc.edu?subject=Patient Report: ${selectedPatient.patientName}&body=Patient: ${selectedPatient.patientName}%0AChief Complaint: ${selectedPatient.chiefComplaint}%0A%0AView full report in dashboard.`
+                    window.location.href = email
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  📧 Send Report
+                </motion.button>
+              </div>
+            )}
+
+          </div>
+        ) : (
+          <div className="chat-main-area">
+            <div className="chat-header">
+              <h2>Doctor Dashboard</h2>
+            </div>
+            <div className="chat-messages-container">
+              <div className="patient-info-card">
+                <h4>Welcome to Vitals Dashboard</h4>
+                <p>Select a patient from the sidebar to view their information and start a consultation.</p>
+                <p>Features available:</p>
+                <ul style={{ marginTop: '16px', paddingLeft: '20px' }}>
+                  <li>📋 Real-time consultation transcription</li>
+                  <li>📝 Live notes taking</li>
+                  <li>🏥 Sick leave certificate generation</li>
+                  <li>💳 Insurance claim processing</li>
+                  <li>🤖 AI analysis and diagnosis recommendations</li>
+                  <li>📊 Medical history review</li>
+                </ul>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1886,9 +1838,11 @@ Generated: ${new Date().toLocaleString()}
             <h2>Approve Insurance Claim?</h2>
             <div className="approval-preview">
               <p><strong>Patient:</strong> {selectedPatient?.patientName || 'Patient'}</p>
+              <p><strong>Date:</strong> {insuranceData?.date || new Date().toLocaleDateString()}</p>
               <p><strong>Diagnosis:</strong> {insuranceData?.diagnosis || selectedPatient?.possibleDiagnosis?.[0] || selectedPatient?.chiefComplaint}</p>
-              <p><strong>Treatment:</strong> {insuranceData?.treatment || 'Consultation and treatment'}</p>
-              <p><strong>Cost:</strong> {insuranceData?.cost || 'Pending'}</p>
+              <p><strong>Treatment:</strong> {insuranceData?.treatment || 'Medical consultation and evaluation'}</p>
+              <p><strong>Estimated Cost:</strong> {insuranceData?.cost || '$150 - $300'}</p>
+              <p><strong>Reason:</strong> {insuranceData?.reason || selectedPatient?.chiefComplaint || 'General consultation'}</p>
             </div>
             <div className="approval-textarea">
               <label>Reason for approval/denial (editable):</label>
@@ -1932,6 +1886,8 @@ Generated: ${new Date().toLocaleString()}
             <div className="approval-preview">
               <p><strong>Patient:</strong> {selectedPatient?.patientName || 'Patient'}</p>
               <p><strong>Duration:</strong> {sickLeaveData?.days || 3} days</p>
+              <p><strong>Start Date:</strong> {sickLeaveData?.startDate || new Date().toLocaleDateString()}</p>
+              <p><strong>End Date:</strong> {sickLeaveData?.endDate || new Date(Date.now() + (sickLeaveData?.days || 3) * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
               <p><strong>Reason:</strong> {sickLeaveData?.reason || selectedPatient?.possibleDiagnosis?.[0] || selectedPatient?.chiefComplaint}</p>
               <p><strong>Symptoms:</strong> {sickLeaveData?.symptoms || selectedPatient?.symptoms?.join(', ') || 'General consultation'}</p>
             </div>
@@ -1965,14 +1921,350 @@ Generated: ${new Date().toLocaleString()}
   )
 }
 
+function DoctorLogin() {
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    // Fake authentication - accept any email/password
+    setTimeout(() => {
+      setLoading(false)
+      // Store doctor info
+      localStorage.setItem('doctorLoggedIn', 'true')
+      localStorage.setItem('doctorEmail', email)
+      navigate('/assign-patient')
+    }, 1000)
+  }
+
+  return (
+    <div className="doctor-login-page">
+      <motion.div
+        className="login-container"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="login-header">
+          <h1 className="login-logo">Vitals</h1>
+          <p className="login-subtitle">Doctor Portal</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="doctor@vitals.com"
+              required
+              className="login-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              className="login-input"
+            />
+          </div>
+
+          {error && <div className="login-error">{error}</div>}
+
+          <motion.button
+            type="submit"
+            className="login-button"
+            disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </motion.button>
+        </form>
+
+        <p className="login-hint">Demo: Any email/password will work</p>
+      </motion.div>
+    </div>
+  )
+}
+
+function PatientAssignment() {
+  const navigate = useNavigate()
+  const [selectedSpecialist, setSelectedSpecialist] = useState<string>('')
+  const [patientData, setPatientData] = useState<ConversationData | null>(null)
+
+  const specialists = [
+    { id: 'cardiology', name: 'Dr. Sarah Chen', specialty: 'Cardiology', available: true },
+    { id: 'general', name: 'Dr. James Martinez', specialty: 'General Practice', available: true },
+    { id: 'pulmonology', name: 'Dr. Amanda Rodriguez', specialty: 'Pulmonology', available: true },
+    { id: 'neurology', name: 'Dr. Michael Park', specialty: 'Neurology', available: false },
+    { id: 'orthopedics', name: 'Dr. Emily Watson', specialty: 'Orthopedics', available: true },
+  ]
+
+  useEffect(() => {
+    // Check if doctor is logged in
+    if (!localStorage.getItem('doctorLoggedIn')) {
+      navigate('/doctor-login')
+      return
+    }
+
+    // Get patient data from location state or localStorage
+    const locationState = window.history.state
+    if (locationState?.usr) {
+      setPatientData(locationState.usr as ConversationData)
+    }
+  }, [navigate])
+
+  const handleAssign = () => {
+    if (!selectedSpecialist) {
+      alert('Please select a specialist')
+      return
+    }
+
+    const specialist = specialists.find(s => s.id === selectedSpecialist)
+    if (!specialist) return
+
+    // Store assignment
+    if (patientData) {
+      const assignedPatient = {
+        ...patientData,
+        assignedSpecialist: specialist.name,
+        assignedSpecialty: specialist.specialty
+      }
+      localStorage.setItem('assignedPatient', JSON.stringify(assignedPatient))
+      navigate('/dashboard', { state: assignedPatient })
+    } else {
+      navigate('/dashboard')
+    }
+  }
+
+  return (
+    <div className="assignment-page">
+      <motion.div
+        className="assignment-container"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="assignment-header">
+          <h1>Assign Patient to Specialist</h1>
+          <p>Select an available specialist for consultation</p>
+        </div>
+
+        {patientData && (
+          <div className="patient-preview-card">
+            <h3>Patient Information</h3>
+            <p><strong>Name:</strong> {patientData.patientName || 'Patient'}</p>
+            <p><strong>Chief Complaint:</strong> {patientData.chiefComplaint || 'General consultation'}</p>
+            {patientData.symptoms && patientData.symptoms.length > 0 && (
+              <p><strong>Symptoms:</strong> {patientData.symptoms.join(', ')}</p>
+            )}
+          </div>
+        )}
+
+        <div className="specialists-grid">
+          {specialists.map((specialist) => (
+            <motion.div
+              key={specialist.id}
+              className={`specialist-card ${selectedSpecialist === specialist.id ? 'selected' : ''} ${!specialist.available ? 'unavailable' : ''}`}
+              onClick={() => specialist.available && setSelectedSpecialist(specialist.id)}
+              whileHover={specialist.available ? { scale: 1.02, y: -2 } : {}}
+              whileTap={specialist.available ? { scale: 0.98 } : {}}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: specialists.indexOf(specialist) * 0.1 }}
+            >
+              <div className="specialist-avatar">
+                {specialist.name.split(' ').map(n => n[0]).join('')}
+              </div>
+              <h3>{specialist.name}</h3>
+              <p className="specialty">{specialist.specialty}</p>
+              <div className={`availability ${specialist.available ? 'available' : 'unavailable'}`}>
+                {specialist.available ? '✓ Available' : '✗ Unavailable'}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.button
+          className="assign-button"
+          onClick={handleAssign}
+          disabled={!selectedSpecialist}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Assign Patient
+        </motion.button>
+
+        <button
+          className="skip-assignment"
+          onClick={() => navigate('/dashboard')}
+        >
+          Skip Assignment
+        </button>
+      </motion.div>
+    </div>
+  )
+}
+
+function PostJamieScreen() {
+  const navigate = useNavigate()
+  const location = window.history.state
+  const [patientData, setPatientData] = useState<ConversationData | null>(null)
+
+  useEffect(() => {
+    if (location?.usr) {
+      setPatientData(location.usr as ConversationData)
+    }
+  }, [location])
+
+  const handleContinue = () => {
+    if (patientData) {
+      // Check if doctor is logged in
+      if (localStorage.getItem('doctorLoggedIn')) {
+        navigate('/assign-patient', { state: patientData })
+      } else {
+        navigate('/doctor-login', { state: patientData })
+      }
+    } else {
+      navigate('/doctor-login')
+    }
+  }
+
+  return (
+    <div className="post-jamie-page">
+      <motion.div
+        className="post-jamie-container"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div
+          className="success-icon"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        >
+          ✓
+        </motion.div>
+
+        <motion.h1
+          className="post-jamie-title"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          Pre-Screening Complete!
+        </motion.h1>
+
+        <motion.p
+          className="post-jamie-subtitle"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          Your conversation with Jamie has been recorded and analyzed.
+        </motion.p>
+
+        {patientData && (
+          <motion.div
+            className="summary-preview"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <h3>Summary</h3>
+            <div className="summary-item">
+              <strong>Patient:</strong> {patientData.patientName || 'Patient'}
+            </div>
+            {patientData.chiefComplaint && (
+              <div className="summary-item">
+                <strong>Chief Complaint:</strong> {patientData.chiefComplaint}
+              </div>
+            )}
+            {patientData.symptoms && patientData.symptoms.length > 0 && (
+              <div className="summary-item">
+                <strong>Symptoms:</strong> {patientData.symptoms.slice(0, 3).join(', ')}
+                {patientData.symptoms.length > 3 && ` +${patientData.symptoms.length - 3} more`}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        <motion.button
+          className="continue-button"
+          onClick={handleContinue}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0 }}
+          whileHover={{ scale: 1.05, boxShadow: "0 8px 30px rgba(7, 133, 84, 0.5)" }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Continue to Doctor Portal →
+        </motion.button>
+      </motion.div>
+    </div>
+  )
+}
+
+function NotFound() {
+  const navigate = useNavigate()
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      background: 'linear-gradient(to bottom, #f0fdf4 0%, #dcfce7 50%, #ffffff 100%)'
+    }}>
+      <h1 style={{ fontSize: '72px', color: '#065f46', marginBottom: '16px' }}>404</h1>
+      <p style={{ fontSize: '24px', color: '#047857', marginBottom: '32px' }}>Page Not Found</p>
+      <button 
+        onClick={() => navigate('/')}
+        style={{
+          padding: '16px 32px',
+          fontSize: '18px',
+          fontWeight: 600,
+          color: 'white',
+          background: 'linear-gradient(135deg, #078554 0%, #13A56A 100%)',
+          border: 'none',
+          borderRadius: '12px',
+          cursor: 'pointer'
+        }}
+      >
+        Go Home
+      </button>
+    </div>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/voice" element={<VoiceSession />} />
+        <Route path="/post-jamie" element={<PostJamieScreen />} />
+        <Route path="/doctor-login" element={<DoctorLogin />} />
+        <Route path="/assign-patient" element={<PatientAssignment />} />
         <Route path="/report" element={<Report />} />
         <Route path="/dashboard" element={<DoctorDashboard />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
