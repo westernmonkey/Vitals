@@ -46,7 +46,6 @@ export const medicalProtocols: MedicalProtocol[] = [
 ]
 
 export function getRecommendedTests(symptoms: string[]): string[] {
-  const allTests: string[] = []
   const testSet = new Set<string>()
   
   symptoms.forEach(symptom => {
@@ -62,7 +61,6 @@ export function getRecommendedTests(symptoms: string[]): string[] {
 }
 
 export function getPossibleDiagnosis(symptoms: string[]): string[] {
-  const diagnoses: string[] = []
   const diagnosisSet = new Set<string>()
   
   symptoms.forEach(symptom => {

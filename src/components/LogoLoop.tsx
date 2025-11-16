@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 
 interface Logo {
   node?: React.ReactNode
@@ -38,12 +38,6 @@ export default function LogoLoop({
 
   const currentSpeed = isHovered ? hoverSpeed : speed
   const isHorizontal = direction === 'left' || direction === 'right'
-  const isVertical = direction === 'up' || direction === 'down'
-
-  const animationDirection = 
-    direction === 'left' ? 'normal' :
-    direction === 'right' ? 'reverse' :
-    direction === 'up' ? 'normal' : 'reverse'
 
   const duplicatedLogos = [...logos, ...logos]
 
